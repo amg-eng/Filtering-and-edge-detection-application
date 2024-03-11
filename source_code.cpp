@@ -1,9 +1,9 @@
 #include <opencv2/imgcodecs.hpp>
-#include <iostream>
 #include <random>
 #include <cmath>
 
 #include"source_code.h"
+
 
 
 

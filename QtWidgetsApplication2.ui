@@ -18,7 +18,7 @@
     <item>
      <widget class="QTabWidget" name="tabWidget">
       <property name="currentIndex">
-       <number>2</number>
+       <number>1</number>
       </property>
       <widget class="QWidget" name="Filter">
        <attribute name="title">
@@ -237,7 +237,6 @@
              <property name="font">
               <font>
                <pointsize>13</pointsize>
-               <weight>75</weight>
                <bold>true</bold>
               </font>
              </property>
@@ -274,7 +273,6 @@
              <property name="font">
               <font>
                <pointsize>13</pointsize>
-               <weight>75</weight>
                <italic>false</italic>
                <bold>true</bold>
               </font>
@@ -319,11 +317,38 @@
           </property>
           <layout class="QVBoxLayout" name="verticalLayout_14">
            <item>
+            <widget class="QPushButton" name="sobel">
+             <property name="text">
+              <string>sobel</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="prewitt">
+             <property name="text">
+              <string>prewitt</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="robert">
+             <property name="text">
+              <string>robert</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="canny">
+             <property name="text">
+              <string>canny</string>
+             </property>
+            </widget>
+           </item>
+           <item>
             <widget class="QGroupBox" name="inputgroupBox_3">
              <property name="font">
               <font>
                <pointsize>13</pointsize>
-               <weight>75</weight>
                <bold>true</bold>
               </font>
              </property>
@@ -346,7 +371,6 @@
              <property name="font">
               <font>
                <pointsize>13</pointsize>
-               <weight>75</weight>
                <italic>false</italic>
                <bold>true</bold>
               </font>
@@ -401,7 +425,6 @@
              <property name="font">
               <font>
                <pointsize>13</pointsize>
-               <weight>75</weight>
                <bold>true</bold>
               </font>
              </property>
@@ -420,18 +443,10 @@
             </widget>
            </item>
            <item>
-            <widget class="QPushButton" name="pushButton">
-             <property name="text">
-              <string>PushButton</string>
-             </property>
-            </widget>
-           </item>
-           <item>
             <widget class="QGroupBox" name="outputGroupBox_4">
              <property name="font">
               <font>
                <pointsize>13</pointsize>
-               <weight>75</weight>
                <italic>false</italic>
                <bold>true</bold>
               </font>
@@ -894,7 +909,6 @@
              <property name="font">
               <font>
                <pointsize>13</pointsize>
-               <weight>75</weight>
                <bold>true</bold>
               </font>
              </property>
@@ -917,7 +931,6 @@
              <property name="font">
               <font>
                <pointsize>13</pointsize>
-               <weight>75</weight>
                <italic>false</italic>
                <bold>true</bold>
               </font>
@@ -1170,7 +1183,7 @@
      <x>0</x>
      <y>0</y>
      <width>1181</width>
-     <height>26</height>
+     <height>19</height>
     </rect>
    </property>
   </widget>
@@ -1185,8 +1198,6 @@
   <widget class="QStatusBar" name="statusBar"/>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
- <resources>
-  <include location="QtWidgetsApplication2.qrc"/>
- </resources>
+ <resources/>
  <connections/>
 </ui>
