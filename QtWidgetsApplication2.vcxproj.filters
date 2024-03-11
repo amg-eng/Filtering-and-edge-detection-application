@@ -43,9 +43,15 @@
     <ClCompile Include="source_code.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="histograms.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="source_code.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="histograms.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

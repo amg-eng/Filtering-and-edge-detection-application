@@ -8,7 +8,6 @@
 
 
 
-
 /*
     @brief:     Adds Gaussian noise to the given image.
     @param:     image   : A cv::Mat object representing the input image.

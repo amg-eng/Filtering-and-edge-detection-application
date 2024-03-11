@@ -5,6 +5,7 @@
 #include <random>
 #include <iostream>
 #include "source_code.h"
+#include "histograms.h"
 #include <QFileDialog>
 
 using namespace cv;
@@ -14,6 +15,9 @@ using namespace cv;
 
 Mat image;
 QString fileName;
+
+Mat image_hist;
+
 
 
 QtWidgetsApplication2::QtWidgetsApplication2(QWidget* parent)
@@ -32,6 +36,10 @@ QtWidgetsApplication2::QtWidgetsApplication2(QWidget* parent)
     connect(ui->applyGaussianFilter_btn, &QPushButton::clicked, this, &QtWidgetsApplication2::apply_GaussianFilter);
     connect(ui->applyAverageFilter_btn, &QPushButton::clicked, this, &QtWidgetsApplication2::apply_AverageFilter);
     connect(ui->applyMedianFilter_btn, &QPushButton::clicked, this, &QtWidgetsApplication2::apply_MedianFilter);
+
+    connect(ui->pushButton, &QPushButton::clicked, this, &QtWidgetsApplication2::plot_Histogram);
+    
+
 
     connect(ui->open_btn, &QPushButton::clicked, this, &QtWidgetsApplication2::openImageDialog);
     connect(ui->clear_btn, &QPushButton::clicked, this, &QtWidgetsApplication2::clearImage);
@@ -52,7 +60,7 @@ void QtWidgetsApplication2::openImageDialog()
     if (!fileName.isEmpty()) {
         // Read the selected image using OpenCV
         image = imread(fileName.toStdString());
-
+        image_hist = imread(fileName.toStdString());
         if (!image.empty()) {
             // Convert the OpenCV Mat image to QImage with the same color format
             QImage qImage(image.data, image.cols, image.rows, image.step, QImage::Format_BGR888); // Assuming OpenCV loads in BGR format
@@ -61,10 +69,32 @@ void QtWidgetsApplication2::openImageDialog()
                 return;
             }
 
+
+
             // Display the image in the input_image_label QLabel
             QPixmap pixmap = QPixmap::fromImage(qImage);
             ui->input_image_label->setPixmap(pixmap.scaled(ui->input_image_label->size(), Qt::KeepAspectRatio));
             ui->input_image_label->setAlignment(Qt::AlignCenter);
+
+        }
+        else {
+            std::cerr << "Error: Unable to load image: " << fileName.toStdString() << std::endl;
+        }
+
+        if (!image_hist.empty()) {
+            // Convert the OpenCV Mat image to QImage with the same color format
+            QImage qImage1(image_hist.data, image_hist.cols, image_hist.rows, image_hist.step, QImage::Format_BGR888); // Assuming OpenCV loads in BGR format
+            if (qImage1.isNull()) {
+                std::cerr << "Error: Unable to convert image to QImage." << std::endl;
+                return;
+            }
+
+
+
+            // Display the image in the input_image_label QLabel
+            QPixmap pixmap1 = QPixmap::fromImage(qImage1);
+            ui->inputLabel_4->setPixmap(pixmap1.scaled(ui->inputLabel_4->size(), Qt::KeepAspectRatio));
+            ui->inputLabel_4->setAlignment(Qt::AlignCenter);
 
         }
         else {
@@ -255,4 +285,33 @@ void QtWidgetsApplication2::apply_MedianFilter()
 
 
 
+void QtWidgetsApplication2::plot_Histogram()
+{
+    // Check if the image has been loaded
+    if (!image_hist.empty()) {
+        // Calculate histogram
+        Mat hist = calculateHistogram(image_hist, 0); // Assuming channel 0 for grayscale image
+
+        // Plot histogram with blue color
+        Mat histogramImage = plotHistogram(hist, Scalar(0, 0, 255)); // Scalar(Blue, Green, Red)
+
+        // Convert the OpenCV Mat image to QImage with the same color format
+        QImage qImage(histogramImage.data, histogramImage.cols, histogramImage.rows, histogramImage.step, QImage::Format_BGR888); // Assuming OpenCV loads in BGR format
+        if (qImage.isNull()) {
+            std::cerr << "Error: Unable to convert image to QImage." << std::endl;
+            return;
+        }
+
+        // Display the histogram in the inputLabel_4 QLabel
+        QPixmap pixmap1 = QPixmap::fromImage(qImage);
+        ui->label_29->setPixmap(pixmap1.scaled(ui->label_29->size(), Qt::KeepAspectRatio));
+        ui->label_29->setAlignment(Qt::AlignCenter);
+
+
+
+    }
+    else {
+        std::cerr << "Error: No image loaded." << std::endl;
+    }
+}
 

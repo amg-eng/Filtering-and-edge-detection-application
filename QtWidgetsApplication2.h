@@ -22,6 +22,8 @@ public:
     void apply_GaussianFilter();
     void apply_AverageFilter();
     void apply_MedianFilter();
+    void plot_Histogram();
+    //cv::Mat calculateHistogram();
     void applyUniformNoise();
 
 

@@ -2,12 +2,13 @@
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 #include <iostream>
+#include "histograms.h"
 
 void onTrackbar(int, void*) {
     // Empty callback for trackbar
 }
 
-cv::Mat calculateHistogram(const cv::Mat& input, int channel) {
+cv::Mat calculateHistogram(cv::Mat& input, int channel) {
     int histSize = 256;  // Number of bins
     float range[] = { 0, 256 };
     const float* histRange = { range };
@@ -36,7 +37,7 @@ cv::Mat calculateCDF(const cv::Mat& hist) {
     return cdf;
 }
 
-void plotHistogram(const std::string& title, const cv::Mat& hist, const cv::Scalar& color) {
+cv::Mat plotHistogram( const cv::Mat& hist, const cv::Scalar& color) {
     int histWidth = 512;
     int histHeight = 400;
     int binWidth = hist.cols > 0 ? histWidth / hist.cols : 1;
@@ -50,7 +51,7 @@ void plotHistogram(const std::string& title, const cv::Mat& hist, const cv::Scal
             cv::Point(binWidth * i, histHeight - cvRound(hist.at<float>(i) * histHeight)), color, 2, 8, 0);
     }
 
-    cv::imshow(title, histImage);
+    return histImage;
 }
 
 void plotCDF(const std::string& title, const cv::Mat& cdf, const cv::Scalar& color) {
@@ -111,7 +112,6 @@ void plotGrayscaleCDF(const std::string& title, const cv::Mat& cdf, const cv::Sc
     cv::imshow(title, cdfImage);
 }
 
-
 void displayNormalizedEqualizedImages(const cv::Mat& image) {
     cv::Mat normalizedImage, equalizedImage;
 
@@ -146,9 +146,9 @@ void loadAndProcessImage(const std::string& filePath) {
     cv::Mat cdfG = calculateCDF(gHist);
     cv::Mat cdfB = calculateCDF(bHist);
 
-    plotHistogram("R Histogram", rHist, cv::Scalar(0, 0, 255));
-    plotHistogram("G Histogram", gHist, cv::Scalar(0, 255, 0));
-    plotHistogram("B Histogram", bHist, cv::Scalar(255, 0, 0));
+    plotHistogram( rHist, cv::Scalar(0, 0, 255));
+    plotHistogram( gHist, cv::Scalar(0, 255, 0));
+    plotHistogram( bHist, cv::Scalar(255, 0, 0));
 
     plotCDF("CDF Curves R", cdfR, cv::Scalar(0, 0, 255));
     plotCDF("CDF Curves G", cdfG, cv::Scalar(0, 255, 0));
@@ -168,17 +168,13 @@ void loadAndProcessImage(const std::string& filePath) {
     cv::waitKey(0);
 }
 
-int main() {
-    cv::namedWindow("Image Processing App", cv::WINDOW_NORMAL);
-    cv::resizeWindow("Image Processing App", 800, 600);
+    //cv::namedWindow("Image Processing App", cv::WINDOW_NORMAL);
+    //cv::resizeWindow("Image Processing App", 800, 600);
 
-    cv::createTrackbar("Alpha", "Image Processing App", nullptr, 100, onTrackbar);
+    //cv::createTrackbar("Alpha", "Image Processing App", nullptr, 100, onTrackbar);
 
-    std::string filePath;
-    std::cout << "Enter the path to the image: ";
-    std::cin >> filePath;
+    //std::string filePath;
+    //std::cout << "Enter the path to the image: ";
+    //std::cin >> filePath;
 
-    loadAndProcessImage(filePath);
-
-    return 0;
-}
+    //loadAndProcessImage(filePath);
