@@ -21,14 +21,12 @@ const float PEPPER_PROBABILITY = 0.01;
 
 // Function Prototypes
 
-Mat addGaussianNoise(const Mat& image, double mean = 0, double stddev = 25);
-Mat addUniformNoise(const Mat& image, double low = 0, double high = 50);
-Mat addSaltAndPepperNoise(const Mat& image, float salt_prob = 0.01, float pepper_prob = 0.01);
-Mat applyGaussianFilter(const Mat& image, int kernel_size, double sigma);
-Mat applyAverageFilter(const Mat& image, int kernel_size);
-Mat applyMedianFilter(const Mat& image, int kernel_size);
-
-
+Mat addGaussianNoise(const Mat& image, double mean, double stddev, const string& color);
+Mat addUniformNoise(const Mat& image, double low, double high, const string& color);
+Mat addSaltAndPepperNoise(const Mat& image, float salt_prob, float pepper_prob, const string& color);
+Mat applyGaussianFilter(const Mat& image, int kernel_size, double sigma, const string& color);
+Mat applyAverageFilter(const Mat& image, int kernel_size, const string& color);
+Mat applyMedianFilter(const Mat& image, int kernel_size, const string& color);
 
 
 #endif // SOURCE_CODE_H

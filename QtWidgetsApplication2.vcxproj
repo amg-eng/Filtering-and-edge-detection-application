@@ -98,8 +98,12 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="edgeDetection.cpp" />
+    <ClCompile Include="histogramFun.cpp" />
     <ClCompile Include="histograms.cpp" />
+    <ClCompile Include="Hybrid.cpp" />
     <ClCompile Include="source_code.cpp" />
+    <ClCompile Include="thresholding.cpp" />
     <QtRcc Include="QtWidgetsApplication2.qrc" />
     <QtUic Include="QtWidgetsApplication2.ui" />
     <QtMoc Include="QtWidgetsApplication2.h" />
@@ -107,8 +111,12 @@
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="edgeDetection.h" />
+    <ClInclude Include="histogramFun.h" />
     <ClInclude Include="histograms.h" />
+    <ClInclude Include="Hybrid.h" />
     <ClInclude Include="source_code.h" />
+    <ClInclude Include="thresholding.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Condition="Exists('$(QtMsBuild)\qt.targets')">
