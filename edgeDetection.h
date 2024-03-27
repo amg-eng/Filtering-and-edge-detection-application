@@ -12,10 +12,10 @@ std::tuple<cv::Mat, cv::Mat, cv::Mat> applyPrewitt(const cv::Mat& input);
 std::tuple<cv::Mat, cv::Mat, cv::Mat> applyRoberts(const cv::Mat& input);
 
 
-cv::Mat Hysteresis(const cv::Mat& thresholded);
-cv::Mat DoubleThresholding(const cv::Mat& suppressed, float lowThreshold, float highThreshold);
-cv::Mat NonMaxSuppression(const cv::Mat& magnitude_gradient, const cv::Mat& phase_gradient);
+cv::Mat Hysteresis(cv::Mat& thresholded);
+cv::Mat DoubleThresholding(cv::Mat& suppressed, float lowThreshold, float highThreshold);
+cv::Mat NonMaxSuppression(cv::Mat& magnitude_gradient, cv::Mat& phase_gradient);
 void applyCanny(const cv::Mat& input, cv::Mat& output, int lowThreshold = 5, int highThreshold = 20);
 // cv::Mat Detect_Edges_Canny(const cv::Mat &src, int lowThreshold, int highThreshold );
-std::tuple<cv::Mat, cv::Mat, cv::Mat> Detect_Edges_Canny(const cv::Mat& src, int lowThreshold, int highThreshold);
+std::tuple<cv::Mat, cv::Mat, cv::Mat> Detect_Edges_Canny(const cv::Mat & src, int lowThreshold , int highThreshold );
 #endif // EDGEDETECTION_H

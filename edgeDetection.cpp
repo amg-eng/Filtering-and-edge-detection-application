@@ -117,140 +117,150 @@ std::tuple<cv::Mat, cv::Mat, cv::Mat> applyRoberts(const cv::Mat& input) {
     return std::make_tuple(gradX, gradY, grad);
 }
 
-std::tuple<cv::Mat, cv::Mat, cv::Mat> Detect_Edges_Canny(const cv::Mat& src, int lowThreshold = 5, int highThreshold = 20)
-{
+
+
+
+std::tuple<cv::Mat, cv::Mat, cv::Mat> Detect_Edges_Canny(const cv::Mat& src, int lowThreshold = 20, int highThreshold = 50) {
     cv::Mat img = src.clone();
     cv::Mat output;
 
     // FIRST SMOOTH IMAGE
-    cv::Mat blurred = applyGaussianFilter(img, 3, 1.0,"c");
+    cv::Mat grayImage;
+    cv::Mat blurredImage;
 
-    // Sobel kernels
-    cv::Mat sobel_x_kernel = (cv::Mat_<float>(3, 3) << -1, 0, 1, -2, 0, 2, -1, 0, 1);
-    cv::Mat sobel_y_kernel = (cv::Mat_<float>(3, 3) << -1, -2, -1, 0, 0, 0, 1, 2, 1);
+    cv::cvtColor(img, grayImage, COLOR_BGR2GRAY);
+    cv::GaussianBlur(grayImage, blurredImage, Size(5, 5), 1.4);
+    cv::Mat sobel_x_kernel = (cv::Mat_<float>(3, 3) <<
+        -1, 0, 1,
+        -2, 0, 2,
+        -1, 0, 1);
 
+    cv::Mat sobel_y_kernel = (cv::Mat_<float>(3, 3) <<
+        -1, -2, -1,
+        0, 0, 0,
+        1, 2, 1);
     cv::Mat gradX, gradY;
-    cv::filter2D(blurred, gradX, CV_32F, sobel_x_kernel);
-    cv::filter2D(blurred, gradY, CV_32F, sobel_y_kernel);
+    // std::tuple<cv::Mat, cv::Mat, cv::Mat> result = applySobel(blurredImage);
+    // gradX = std::get<0>(result);
+    // gradY = std::get<1>(result);
+    cv::filter2D(blurredImage, gradX, CV_32F, sobel_x_kernel);
 
+    // Calculate gradient in Y direction
+    cv::filter2D(blurredImage, gradY, CV_32F, sobel_y_kernel);
     cv::Mat magnitude_gradient = Magnitude_Gradient(gradX, gradY);
     cv::Mat phase_gradient = Phase_Gradient(gradX, gradY);
 
-    // THEN SUPPRESS NON-MAXIMUM EDGES
+    // THEN SUPPRESS NON-MAXIMUM EDGES (with slightly relaxed comparison)
     cv::Mat suppressed = NonMaxSuppression(magnitude_gradient, phase_gradient);
 
-    // THEN APPLY THRESHOLDING
+    // THEN APPLY THRESHOLDING (adjusted thresholds)
     cv::Mat thresholded = DoubleThresholding(suppressed, lowThreshold, highThreshold);
 
     // THEN APPLY HYSTERESIS
     cv::Mat canny_edges = Hysteresis(thresholded);
 
     // Convert Canny edges to 8-bit
-    //canny_edges.convertTo(canny_edges, CV_8U);
-    cv::Canny(src, canny_edges, lowThreshold, highThreshold);
+    // canny_edges.convertTo(canny_edges, CV_8U);
+
     // Return a tuple of the X gradient, Y gradient, and Canny edges
     return std::make_tuple(gradX, gradY, canny_edges);
 }
-
-
-cv::Mat NonMaxSuppression(const cv::Mat& magnitude_gradient, const cv::Mat& phase_gradient) {
-    cv::Mat suppressed = cv::Mat::zeros(magnitude_gradient.size(), CV_32F);
-    cv::Mat angles;
-    phase_gradient.copyTo(angles);
-
-    for (int i = 1; i < magnitude_gradient.rows - 1; ++i) {
-        for (int j = 1; j < magnitude_gradient.cols - 1; ++j) {
-            // Adjust negative angles
-            if (angles.at<float>(i, j) < 0) {
-                angles.at<float>(i, j) += 360.0f;
+cv::Mat NonMaxSuppression(cv::Mat& magnitude_gradient, cv::Mat& phase_gradient)
+{
+    cv::Mat suppressed = cv::Mat::zeros(cv::Size(magnitude_gradient.cols, magnitude_gradient.rows), magnitude_gradient.type());
+    cv::Mat angles = phase_gradient.clone();
+    for (int i = 1; i < angles.rows - 1; i++)
+    {
+        for (int j = 1; j < angles.cols - 1; j++)
+        {
+            if (angles.at<float>(i, j) < 0)
+            {
+                angles.at<float>(i, j) = angles.at<float>(i, j) + 360;
             }
-
-            // Perform non-maximum suppression
-            float mag = magnitude_gradient.at<float>(i, j);
-            float angle = angles.at<float>(i, j);
-
-            float q = 255.0f;
-            float r = 255.0f;
-
-            // Angle near 0 degrees
-            if ((angle >= 0.0f && angle < 22.5f) || (angle >= 157.5f && angle <= 180.0f)) {
-                q = magnitude_gradient.at<float>(i, j + 1);
-                r = magnitude_gradient.at<float>(i, j - 1);
+            // # 0 degrees
+            if ((angles.at<float>(i, j) >= 337.5 || angles.at<float>(i, j) < 22.5) || (angles.at<float>(i, j) >= 157.5 && angles.at<float>(i, j) < 202.5))
+            {
+                if (magnitude_gradient.at<float>(i, j) >= magnitude_gradient.at<float>(i, j + 1) && magnitude_gradient.at<float>(i, j) >= magnitude_gradient.at<float>(i, j - 1))
+                {
+                    suppressed.at<float>(i, j) = magnitude_gradient.at<float>(i, j);
+                }
             }
-            // Angle near 45 degrees
-            else if (angle >= 22.5f && angle < 67.5f) {
-                q = magnitude_gradient.at<float>(i + 1, j - 1);
-                r = magnitude_gradient.at<float>(i - 1, j + 1);
+            // # 45 degrees
+            if ((angles.at<float>(i, j) >= 22.5 && angles.at<float>(i, j) < 67.5) || (angles.at<float>(i, j) >= 202.5 && angles.at<float>(i, j) < 247.5))
+            {
+                if (magnitude_gradient.at<float>(i, j) >= magnitude_gradient.at<float>(i - 1, j + 1) && magnitude_gradient.at<float>(i, j) >= magnitude_gradient.at<float>(i + 1, j - 1))
+                {
+                    suppressed.at<float>(i, j) = magnitude_gradient.at<float>(i, j);
+                }
             }
-            // Angle near 90 degrees
-            else if (angle >= 67.5f && angle < 112.5f) {
-                q = magnitude_gradient.at<float>(i + 1, j);
-                r = magnitude_gradient.at<float>(i - 1, j);
+            // # 90 degrees
+            if ((angles.at<float>(i, j) >= 67.5 && angles.at<float>(i, j) < 112.5) || (angles.at<float>(i, j) >= 247.5 && angles.at<float>(i, j) < 292.5))
+            {
+                if (magnitude_gradient.at<float>(i, j) >= magnitude_gradient.at<float>(i - 1, j) && magnitude_gradient.at<float>(i, j) >= magnitude_gradient.at<float>(i + 1, j))
+                {
+                    suppressed.at<float>(i, j) = magnitude_gradient.at<float>(i, j);
+                }
             }
-            // Angle near 135 degrees
-            else if (angle >= 112.5f && angle < 157.5f) {
-                q = magnitude_gradient.at<float>(i - 1, j - 1);
-                r = magnitude_gradient.at<float>(i + 1, j + 1);
-            }
-
-            if (mag >= q && mag >= r) {
-                suppressed.at<float>(i, j) = mag;
-            }
-            else {
-                suppressed.at<float>(i, j) = 0.0f;
+            // # 135 degrees
+            if ((angles.at<float>(i, j) >= 112.5 && angles.at<float>(i, j) < 157.5) || (angles.at<float>(i, j) >= 292.5 && angles.at<float>(i, j) < 337.5))
+            {
+                if (magnitude_gradient.at<float>(i, j) >= magnitude_gradient.at<float>(i - 1, j - 1) && magnitude_gradient.at<float>(i, j) >= magnitude_gradient.at<float>(i + 1, j + 1))
+                {
+                    suppressed.at<float>(i, j) = magnitude_gradient.at<float>(i, j);
+                }
             }
         }
     }
-
     return suppressed;
 }
 
-cv::Mat DoubleThresholding(const cv::Mat& suppressed, float lowThreshold, float highThreshold) {
-    cv::Mat thresholded = cv::Mat::zeros(suppressed.size(), CV_8U);
 
-    for (int i = 0; i < suppressed.rows; ++i) {
-        for (int j = 0; j < suppressed.cols; ++j) {
-            float val = suppressed.at<float>(i, j);
-            if (val >= highThreshold) {
-                thresholded.at<uchar>(i, j) = STRONG_EDGE;
+cv::Mat DoubleThresholding(cv::Mat& suppressed, float lowThreshold, float highThreshold)
+{
+    cv::Mat thresholded = cv::Mat::zeros(Size(suppressed.cols, suppressed.rows), suppressed.type());
+
+    for (int i = 0; i < suppressed.rows - 1; i++)
+    {
+        for (int j = 0; j < suppressed.cols - 1; j++)
+        {
+            if (suppressed.at<float>(i, j) > highThreshold)
+            {
+                thresholded.at<float>(i, j) = STRONG_EDGE;
             }
-            else if (val >= lowThreshold && val < highThreshold) {
-                thresholded.at<uchar>(i, j) = WEAK_EDGE;
+            else if ((suppressed.at<float>(i, j) < highThreshold) && (suppressed.at<float>(i, j) > lowThreshold))
+            {
+                thresholded.at<float>(i, j) = WEAK_EDGE;
             }
-            else {
-                thresholded.at<uchar>(i, j) = 0;
+            else
+            {
+                thresholded.at<float>(i, j) = 0;
             }
         }
     }
-
     return thresholded;
 }
-cv::Mat Hysteresis(const cv::Mat& thresholded) {
+cv::Mat Hysteresis(cv::Mat& thresholded)
+{
     cv::Mat hysteresis = thresholded.clone();
-
-    for (int i = 1; i < thresholded.rows - 1; ++i) {
-        for (int j = 1; j < thresholded.cols - 1; ++j) {
-            if (thresholded.at<uchar>(i, j) == WEAK_EDGE) {
-                if (thresholded.at<uchar>(i - 1, j - 1) == STRONG_EDGE ||
-                    thresholded.at<uchar>(i - 1, j) == STRONG_EDGE ||
-                    thresholded.at<uchar>(i - 1, j + 1) == STRONG_EDGE ||
-                    thresholded.at<uchar>(i, j - 1) == STRONG_EDGE ||
-                    thresholded.at<uchar>(i, j + 1) == STRONG_EDGE ||
-                    thresholded.at<uchar>(i + 1, j - 1) == STRONG_EDGE ||
-                    thresholded.at<uchar>(i + 1, j) == STRONG_EDGE ||
-                    thresholded.at<uchar>(i + 1, j + 1) == STRONG_EDGE) {
-                    hysteresis.at<uchar>(i, j) = STRONG_EDGE;
+    for (int i = 1; i < thresholded.rows - 1; i++)
+    {
+        for (int j = 1; j < thresholded.cols - 1; j++)
+        {
+            if (thresholded.at<float>(i, j) == WEAK_EDGE)
+            {
+                if ((thresholded.at<float>(i + 1, j - 1) == STRONG_EDGE) || (thresholded.at<float>(i + 1, j) == STRONG_EDGE) || (thresholded.at<float>(i + 1, j + 1) == STRONG_EDGE) || (thresholded.at<float>(i, j - 1) == STRONG_EDGE) || (thresholded.at<float>(i, j + 1) == STRONG_EDGE) || (thresholded.at<float>(i - 1, j - 1) == STRONG_EDGE) || (thresholded.at<float>(i - 1, j) == STRONG_EDGE) || (thresholded.at<float>(i - 1, j + 1) == STRONG_EDGE))
+                {
+                    hysteresis.at<float>(i, j) = STRONG_EDGE;
                 }
-                else {
-                    hysteresis.at<uchar>(i, j) = 0;
+                else
+                {
+                    hysteresis.at<float>(i, j) = 0;
                 }
             }
         }
     }
-
     return hysteresis;
 }
-
 cv::Mat Magnitude_Gradient(const cv::Mat& gradient_x, const cv::Mat& gradient_y)
 {
     cv::Mat Magnitude_Gradient = cv::Mat::zeros(cv::Size(gradient_x.cols, gradient_x.rows), gradient_x.type());
@@ -263,7 +273,6 @@ cv::Mat Magnitude_Gradient(const cv::Mat& gradient_x, const cv::Mat& gradient_y)
     }
     return Magnitude_Gradient;
 }
-
 cv::Mat Phase_Gradient(const cv::Mat& gradient_x, const cv::Mat& gradient_y)
 {
     cv::Mat phase_gradient = cv::Mat::zeros(cv::Size(gradient_x.cols, gradient_y.rows), CV_32FC1);
