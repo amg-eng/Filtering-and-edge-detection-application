@@ -52,7 +52,7 @@ Team:
 | Team Members' Names | 
 |---------------------|
 | [Ahmed Kamal](https://github.com/AhmedKamalMohammedElSayed)|
-| [Amgad Atef]        | 
+| [Amgad Atef](https://github.com/amg-eng)| 
 | [Mahmoud Magdy]     |       
 | [Mahmoud Mohamed ]  |        
 | [Mohanad Emad]      |        
